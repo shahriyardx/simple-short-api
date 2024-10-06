@@ -1,7 +1,10 @@
-from quart import Blueprint, request, abort, Response
+from prisma.errors import UniqueViolationError
+from quart import Blueprint, Response, abort, redirect, request
+
 from .db import prisma
-from .utils import generate_random_string
-bp = Blueprint("psn", __name__, url_prefix="/")
+from .utils.text import generate_random_string
+
+bp = Blueprint("shorten", __name__)
 
 
 @bp.route("/shorten", methods=["POST"])
@@ -13,14 +16,26 @@ async def shorten():
     if not text:
         text = generate_random_string(4)
 
-    data = await prisma.url.create(
-        data={"text": text, "destination": url},
-    )
+    try:
+        data = await prisma.url.create(
+            data={"text": text, "destination": url},
+        )
+    except UniqueViolationError:
+        return {
+            "success": False,
+            "error": "Duplicate URL detected",
+        }
 
-    return data
+    return {
+        "success": True,
+        "url": data.destination,
+    }
+
 
 @bp.route("/<string:text>")
 async def view(text):
-    data = await prisma.url.findFirst(where={"text": text})
+    data = await prisma.url.find_first(where={"text": text})
     if not data:
         abort(Response("Not found", 404))
+
+    return redirect(data.destination, 301)
