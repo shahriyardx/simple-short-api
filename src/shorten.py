@@ -29,6 +29,7 @@ async def shorten():
     return {
         "success": True,
         "url": data.destination,
+        "text": text,
     }
 
 
