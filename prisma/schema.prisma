@@ -13,6 +13,92 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String     @id @default(cuid())
+  discordId String     @unique
+  name      String
+  email     String     @unique
+  image     String
+  UserInfo  UserInfo[]
+  Logins    Logins[]
+}
+
+enum Gender {
+  male
+  female
+  unknown
+}
+
+enum Position {
+  left_wing
+  right_wing
+  left_defense
+  right_defense
+  center
+  goalie
+}
+
+enum Hand {
+  left
+  right
+}
+
+model UserInfo {
+  id                String   @id @default(cuid())
+  user              User     @relation(fields: [userId], references: [id])
+  userId            String
+  discordId         String
+  primaryConsole    String
+  psn               String?
+  psn_account_id    String?
+  gamertag          String?
+  xbox_account_id   String?
+  eaId              String?
+  birthday          DateTime
+  gender            Gender
+  jerseyNumber      Int
+  primaryPosition   Position
+  secondaryPosition Position
+  city              String
+  shootingHand      Hand
+  phone             String?
+
+  console_verified Boolean @default(false)
+  user_ip          String?
+  console_ip       String?
+  console_agent    String?
+}
+
+model Settings {
+  id             String @id @default(cuid())
+  npsso          String
+  xapi           String
+  support_server String @default("1283055660866600960")
+}
+
+model Roles {
+  id                  String   @id @default(cuid())
+  left_wing           String
+  right_wing          String
+  left_defense        String
+  right_defense       String
+  center              String
+  goalie              String
+  playstation         String
+  xbox                String
+  signup_add_roles    String[]
+  signup_remove_roles String[]
+}
+
+model Logins {
+  id     String   @id @default(cuid())
+  userId String
+  time   DateTime
+  ip     String
+
+  user User @relation(fields: [userId], references: [id])
+}
+
 model Url {
   id          String @id @default(cuid())
   text        String @unique

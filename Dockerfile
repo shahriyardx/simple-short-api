@@ -14,4 +14,4 @@ RUN prisma generate
 
 COPY . .
 
-CMD [ "sh", "-c", "prisma db push && python3 server.py" ]
+CMD [ "sh", "-c", "python3 server.py" ]
